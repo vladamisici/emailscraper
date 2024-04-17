@@ -1,6 +1,7 @@
 <script setup>
-import RegisterPage from './views/RegisterPage.vue';
+import LoginPage from './views/LoginPage.vue';
 import LandingPageVue from './views/LandingPage.vue';
+import AboutUsPage from './views/AboutUsPage.vue';
 </script>
 
 <template>
