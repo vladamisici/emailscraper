@@ -1,5 +1,5 @@
 from db import db
-from hashlib import sha256
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     __tablename__ = 'Users'
@@ -9,8 +9,13 @@ class User(db.Model):
     email = db.Column(db.String(40))
     password = db.Column(db.String(50))
 
+    @staticmethod
     def hash_password(passkey):
-        return sha256(passkey.encode()).hexdigest()
+        return generate_password_hash(passkey)
+    
+    @staticmethod
+    def check_password(user,password):
+        return check_password_hash(user.password, password)
 
     @classmethod
     def get_user_by_username(cls,username):
