@@ -23,7 +23,7 @@ def home():
 
 app.register_blueprint(login_bp,url_prefix="/authentication")
 app.register_blueprint(register_bp,url_prefix="/authentication")
-app.register_blueprint(emails_bp, url_prefix="/emails")
+app.register_blueprint(emails_bp, url_prefix="/mail")
 
 if __name__ == '__main__':
     # context=ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)

@@ -66,9 +66,4 @@ def callback():
     credentials = flow.credentials
     session['credentials'] = credentials.to_json()
 
-    return redirect(url_for('emails.get_emails'))
-
-@login_bp.route('/logout')
-def logout():
-    session.pop('credentials', None)
-    return redirect(url_for(''))
+    return redirect(url_for('emails.get_inbox'))
