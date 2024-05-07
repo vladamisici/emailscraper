@@ -13,6 +13,8 @@ dist-ssr
 *.local
 
 # Editor directories and files
+client_secret_email.json
+/backend/client_secret_email.json
 credentials.yaml
 /backend/credentials.yaml
 /backend/.env
