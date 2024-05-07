@@ -6,6 +6,7 @@ from googleapiclient.errors import HttpError
 from flask import Flask, jsonify, Blueprint, session
 from dotenv import load_dotenv
 import os
+import json
 load_dotenv()
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://mail.google.com/"]
@@ -16,21 +17,21 @@ emails_bp = Blueprint('emails', __name__, url_prefix='/emails')
 @emails_bp.route("/emails")
 def get_emails():
     credentials_json = session.get('credentials')
+
+    Credentials_info = json.loads(credentials_json)
+
     if credentials_json:
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        creds = Credentials.from_authorized_user_info(Credentials_info, SCOPES)
 
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_SECRET_FILE, SCOPES
-        )
+                flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
+        session['credentials'] = creds.to_json()
 
         try:
             # Call the Gmail API
@@ -46,7 +47,7 @@ def get_emails():
                 msg = service.users().messages().get(userId="me", id=email["id"]).execute()
                 subject = next((header['value'] for header in msg['payload']['headers'] if header['name'] == 'Subject'), None)
                 snippet = msg.get('snippet', '')
-                inbox_content.append({'subject':subject, 'snippet':snippet})
+                inbox_content.append({'subject': subject, 'snippet': snippet})
             return jsonify(inbox_content), 200
     
         except Exception as error:
