@@ -13,9 +13,9 @@ class User(db.Model):
     def hash_password(passkey):
         return generate_password_hash(passkey)
     
-    @staticmethod
-    def check_password(user,password):
-        return check_password_hash(user.password, password)
+    @classmethod
+    def check_password(self,password):
+        return check_password_hash(password, self.password)
 
     @classmethod
     def get_user_by_username(cls,username):

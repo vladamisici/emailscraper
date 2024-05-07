@@ -17,6 +17,7 @@ def register():
         email = data.get('email'),
         password = User.hash_password(data.get('password'))
     )
+    print(new_user.password)
     new_user.save()
     return jsonify({"message":"user created"})
     
