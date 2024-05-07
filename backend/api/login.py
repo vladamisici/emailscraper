@@ -14,7 +14,7 @@ CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 CLIENT_SECRET_FILE = os.getenv('CLIENT_SECRET_FILE')
 
-AUTH_URL = 'http://localhost'
+AUTH_URL = os.getenv('AUTH_URL')
 
 SCOPES = ["https://mail.google.com/"]
 
