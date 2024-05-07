@@ -13,6 +13,18 @@ dist-ssr
 *.local
 
 # Editor directories and files
+/backend/cert.pem
+/backend/csr.pem
+/backend/key.pem
+key.pem
+.pem
+csr.pem
+cert.pem
+token.json
+/backend/api/token.json
+client_secret.json
+.json
+/backend/client_secret.json
 client_secret_email.json
 /backend/client_secret_email.json
 credentials.yaml
