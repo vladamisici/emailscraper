@@ -5,10 +5,15 @@ from werkzeug.security import check_password_hash
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from google_auth_oauthlib.flow import InstalledAppFlow
+from dotenv import load_dotenv
+import os
 
-CLIENT_ID = '339144602283-s2b47qd4vh5hk8ksu68as6b2lp8v1g5d.apps.googleusercontent.com'
-CLIENT_SECRET = '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'
-CLIENT_SECRET_FILE = "client_secret_email.json"
+load_dotenv()
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+CLIENT_SECRET_FILE = os.getenv('CLIENT_SECRET_FILE')
+
 AUTH_URL = 'http://localhost'
 
 SCOPES = ["https://mail.google.com/"]
