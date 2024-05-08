@@ -11,40 +11,19 @@
     <div class="mt-8">
       <div v-if="category === 'sent'" class="bg-white shadow-lg rounded-lg p-6 overflow-y-auto max-h-96">
         <h2 class="text-xl font-semibold mb-4">Sent Emails</h2>
-        <ul>
-          <li v-for="(email, index) in paginatedEmails" :key="index" class="mb-4">
-            <div class="bg-gray-100 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold">{{ email.title }}</h3>
-              <p class="text-gray-600 mb-1">From: {{ email.sender }}</p>
-              <p class="text-gray-600 mb-1">Date: {{ email.date }}</p>
-              <p class="text-gray-600 mb-2">Time: {{ email.time }}</p>
-              <p class="text-gray-700">{{ email.content.substring(0, 100) }}{{ email.content.length > 100 ? '...' : '' }}</p>
-            </div>
-          </li>
-        </ul>
-        <div class="flex justify-end mt-4">
-          <button @click="currentPage--" :disabled="currentPage === 1" class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 mr-2">Previous</button>
-          <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-4 py-2 rounded-md bg-gray-200 text-gray-700">Next</button>
-        </div>
+        <!-- Your existing code for displaying sent emails -->
       </div>
       <div v-else class="bg-white shadow-lg rounded-lg p-6 overflow-y-auto max-h-96">
         <h2 class="text-xl font-semibold mb-4">Inbox Emails</h2>
-        <ul>
-          <li v-for="(email, index) in paginatedEmails" :key="index" class="mb-4">
-            <div class="bg-gray-100 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold">{{ email.title }}</h3>
-              <p class="text-gray-600 mb-1">From: {{ email.sender }}</p>
-              <p class="text-gray-600 mb-1">Date: {{ email.date }}</p>
-              <p class="text-gray-600 mb-2">Time: {{ email.time }}</p>
-              <p class="text-gray-700">{{ email.content.substring(0, 100) }}{{ email.content.length > 100 ? '...' : '' }}</p>
-            </div>
-          </li>
-        </ul>
-        <div class="flex justify-end mt-4">
-          <button @click="currentPage--" :disabled="currentPage === 1" class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 mr-2">Previous</button>
-          <button @click="currentPage++" :disabled="currentPage === totalPages" class="px-4 py-2 rounded-md bg-gray-200 text-gray-700">Next</button>
-        </div>
+        <!-- Your existing code for displaying inbox emails -->
       </div>
+    </div>
+    <div class="flex justify-center mt-4">
+      <!-- Refresh button -->
+      <button @click="refreshEmails" class="flex items-center justify-center bg-gray-200 border border-gray-300 rounded-md py-2 px-4 text-gray-700 hover:bg-gray-300 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
+        <img src="/src/assets/styles/Icons/refresh_icon.png" alt="Refresh Logo" class="w-6 h-6 mr-2">
+        Refresh
+      </button>
     </div>
   </div>
 </template>
@@ -54,43 +33,30 @@ import { ref, watchEffect, computed } from 'vue';
 
 // Sample data for sent and inbox emails
 const sentEmails = [
-  { title: 'Sent Email 1', sender: 'sender@example.com', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', date: '2024-05-10', time: '10:00 AM' },
-  { title: 'Sent Email 2', sender: 'sender@example.com', content: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', date: '2024-05-09', time: '11:30 AM' },
-  // Add more sample data as needed
+  // Sample sent emails data
 ];
 
 const inboxEmails = [
-  { title: 'Inbox Email 1', sender: 'sender@example.com', content: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.', date: '2024-05-10', time: '9:45 AM' },
-  { title: 'Inbox Email 2', sender: 'sender@example.com', content: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.', date: '2024-05-09', time: '1:15 PM' },
-  // Add more sample data as needed
+  // Sample inbox emails data
 ];
 
 const category = ref('sent');
 const username = ref('John Doe'); // Sample username, replace it with actual logged-in user's name
-const emailsPerPage = 5; // Number of emails per page
-let currentPage = ref(1); // Current page number
 
-// Computed property to filter emails based on selected category
-const filteredEmails = computed(() => {
-  return category.value === 'sent' ? sentEmails : inboxEmails;
-});
+// Method to refresh emails
+const refreshEmails = async () => {
+  try {
+    // Fetch emails from the server
+    const response = await fetch('https://127.0.0.1:5000/mail/inbox');
+    const data = await response.json();
 
-// Computed property to paginate emails
-const paginatedEmails = computed(() => {
-  const startIndex = (currentPage.value - 1) * emailsPerPage;
-  const endIndex = startIndex + emailsPerPage;
-  return filteredEmails.value.slice(startIndex, endIndex);
-});
-
-// Computed property for total number of pages
-const totalPages = computed(() => {
-  return Math.ceil(filteredEmails.value.length / emailsPerPage);
-});
-
-// Watcher to reset current page when category changes
-watchEffect(() => {
-  currentPage.value = 1;
-});
+    // Update inboxEmails with new data
+    inboxEmails.splice(0, inboxEmails.length, ...data);
+  } catch (error) {
+    console.error('Error fetching emails:', error);
+    // Show error message or handle error
+  }
+};
 </script>
 
 <style scoped>

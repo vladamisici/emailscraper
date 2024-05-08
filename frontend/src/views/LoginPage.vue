@@ -20,6 +20,10 @@
         </div>
         <a href="#" class="text-sm text-orange-500 hover:text-orange-700 hover:underline">Forgot Password?</a>
         <button type="submit" class="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">Log in</button>
+        <button @click="openGmailLogin" class="flex items-center justify-center bg-white border border-gray-300 rounded-md w-full py-2 text-gray-800 hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
+          <img src="/src/assets/styles/images//gmail_logo.png" alt="Gmail Logo" class="w-6 h-6 mr-2">
+          Login with Gmail
+        </button>
       </form>
       <Toast ref="toast"></Toast>
     </div>
@@ -62,6 +66,14 @@ export default {
     },
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
+    },
+    openGmailLogin() {
+      // URL for Gmail authentication
+      const gmailAuthUrl = 'https://127.0.0.1:5000/authentication/login_oauth';
+      // Open the URL in a pop-up window
+      window.open(gmailAuthUrl, 'Gmail Login', 'width=600,height=600');
+
+      this.$router.push('/scrape');
     }
   }
 };
