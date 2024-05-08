@@ -3,7 +3,7 @@
     <!-- Back button -->
     <div class="absolute top-5 left-5">
       <button @click="goBack" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full">
-        <img src='/src/assets/icons/back-arrow.svg' alt="back" class="w-4 h-4" />
+        <img src='/Users/vladamisici/Documents/emailscraper/emailscraper/frontend/src/assets/styles/Icons/back-arrow.svg' alt="back" class="w-4 h-4" />
       </button>
     </div>
     <!-- Content container -->
