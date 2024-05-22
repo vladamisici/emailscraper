@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect, computed , onMounted} from 'vue';
 
 // Sample data for sent and inbox emails
 const sentEmails = [
@@ -43,20 +43,24 @@ const inboxEmails = [
 const category = ref('sent');
 const username = ref('John Doe'); // Sample username, replace it with actual logged-in user's name
 
-// Method to refresh emails
-const refreshEmails = async () => {
+const fetchEmails = async () => {
   try {
-    // Fetch emails from the server
-    const response = await fetch('https://127.0.0.1:5000/mail/inbox');
-    const data = await response.json();
-
-    // Update inboxEmails with new data
-    inboxEmails.splice(0, inboxEmails.length, ...data);
+    const response = await fetch('/emails/inbox');
+    if (response.ok) {
+      inboxEmails.value = await response.json();
+    } else {
+      console.error('Failed to fetch emails');
+    }
   } catch (error) {
     console.error('Error fetching emails:', error);
-    // Show error message or handle error
   }
 };
+
+onMounted(fetchEmails);
+
+// Method to refresh emails
+const refreshEmails = fetchEmails;
+
 </script>
 
 <style scoped>

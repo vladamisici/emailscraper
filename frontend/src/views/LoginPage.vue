@@ -48,32 +48,48 @@ export default {
     };
   },
   methods: {
-    login() {
-      this.usernameError = '';
-      this.passwordError = '';
-      if (!this.username) {
-        this.usernameError = 'Username is required.';
-        this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000});
-      }
-      if (!this.password) {
-        this.passwordError = 'Password is required.';
-        this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000});
-      }
-      if (this.username && this.password) {
-        this.$refs.toast.add({severity: 'info', summary: 'Login Attempt', detail: `Login attempt with username: ${this.username}`, life: 3000});
+    async login() {
+    this.usernameError = '';
+    this.passwordError = '';
+    
+    if (!this.username) {
+      this.usernameError = 'Username is required.';
+      this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000});
+      return;
+    }
+    
+    if (!this.password) {
+      this.passwordError = 'Password is required.';
+      this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000});
+      return;
+    }
+
+    try {
+      const response = await fetch('/login/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: this.username, password: this.password })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        this.$refs.toast.add({severity: 'info', summary: 'Login Successful', detail: data.message, life: 3000});
         this.$router.push('/scrape');
+      } else {
+        const errorData = await response.json();
+        this.$refs.toast.add({severity: 'error', summary: 'Login Failed', detail: errorData.error, life: 3000});
       }
-    },
+    } catch (error) {
+      this.$refs.toast.add({severity: 'error', summary: 'Login Error', detail: error.message, life: 3000});
+    }
+  },
+  openGmailLogin() {
+    window.location.href = 'https://127.0.0.1:5000/login/login_oauth';
+  },
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
-    },
-    openGmailLogin() {
-      // URL for Gmail authentication
-      const gmailAuthUrl = 'https://127.0.0.1:5000/authentication/login_oauth';
-      // Open the URL in a pop-up window
-      window.open(gmailAuthUrl, 'Gmail Login', 'width=600,height=600');
-
-      this.$router.push('/scrape');
     }
   }
 };
