@@ -67,14 +67,23 @@ export default {
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     },
-    openGmailLogin() {
-      // URL for Gmail authentication
+    async openGmailLogin() {
+      // window.location.href = 'https://127.0.0.1:5000/authentication/login_oauth';
+      // this.$router.push({ path: '/scrape' });
       const gmailAuthUrl = 'https://127.0.0.1:5000/authentication/login_oauth';
-      // Open the URL in a pop-up window
-      window.open(gmailAuthUrl, 'Gmail Login', 'width=600,height=600');
+      const newWindow = window.open(gmailAuthUrl, 'Gmail Login', 'width=600,height=600');
 
-      this.$router.push('/scrape');
-    }
+      const checkWindowClosed = setInterval(() => {
+        if (newWindow.closed) {
+          clearInterval(checkWindowClosed);
+          // Assuming access token is stored in a response variable from the popup window
+          if (response && response.accessToken) {
+            localStorage.setItem('accessToken', response.accessToken);
+            this.$router.push('/scrape');
+          }
+        }
+      }, 1000);
+}
   }
 };
 </script>
