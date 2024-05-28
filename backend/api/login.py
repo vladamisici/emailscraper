@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, json
 import jwt
 from models.user import User
 from werkzeug.security import check_password_hash
@@ -7,7 +7,9 @@ from google_auth_oauthlib.flow import Flow
 from google_auth_oauthlib.flow import InstalledAppFlow
 from dotenv import load_dotenv
 import os
-from .scrape import emails_bp
+from flask_cors import CORS, cross_origin
+from .scrape import emails_bp, get_inbox
+import flask
 
 load_dotenv()
 
@@ -20,6 +22,9 @@ AUTH_URL = os.getenv('AUTH_URL')
 SCOPES = ["https://mail.google.com/"]
 
 login_bp = Blueprint('login', __name__, url_prefix='/login')
+CORS(login_bp, resources={r"*": {"origins": "https://localhost:5173", "supports_credentials": True}})
+
+
 
 @login_bp.route('/login', methods=['POST'])
 def login():
@@ -40,30 +45,51 @@ def login():
 
 @login_bp.route('/login_oauth', methods=['GET'])
 def login_oauth():
-    flow = InstalledAppFlow.from_client_secrets_file(
+    flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE, scopes=SCOPES
     )
-    flow.redirect_uri = url_for('.callback', _external=True)
+    flow.redirect_uri = url_for('.callback', _external=True, _scheme='https')
     authorization_url, state = flow.authorization_url(
         access_type='offline',
         prompt='select_account'
     )
     session['state'] = state
-    return redirect(authorization_url)
+    # print(session)
+    return flask.redirect(authorization_url)
 
 @login_bp.route('/callback')
 def callback():
-    if request.args.get('state') != session.pop('state', None):
+    state = session.get('state')
+    print(state)
+    if not state or request.args.get('state') != state:
         return 'Invalid state', 400
-    flow = InstalledAppFlow.from_client_secrets_file(
+    flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE, scopes=SCOPES
     )
-    flow.redirect_uri = url_for('.callback', _external=True)
+    flow.redirect_uri = url_for('.callback', _external=True, _scheme='https')
 
     authorization_response = request.url
     flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
-    session['credentials'] = credentials.to_json()
+    # print("credentiale asddasd", json.dumps(credentials.to_json(), indent=2))
+    # print(credentials.to_json())
+    session['credentials'] = credentials_to_dict(credentials)
+    # print(session)
+    # return redirect(url_for('emails.get_inbox'))
+    # return get_inbox()
+    return redirect('https://localhost:5173/scrape')
 
-    return redirect(url_for('emails.get_inbox'))
+def credentials_to_dict(credentials):
+    return{
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+def get_credentials():
+    credentials = json.loads(session.get('credentials'))
+    return credentials

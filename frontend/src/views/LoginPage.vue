@@ -33,7 +33,9 @@
 <script>
 import Toast from 'primevue/toast';
 import 'primeicons/primeicons.css';
-2
+import axios from 'axios';
+import {account} from '../appwrite'
+
 export default {
   components: {
     Toast
@@ -85,9 +87,26 @@ export default {
       this.$refs.toast.add({severity: 'error', summary: 'Login Error', detail: error.message, life: 3000});
     }
   },
+  // openGmailLogin() {
+  //   axios.get('https://localhost:5000/authentication/login_oauth', { withCredentials: true })
+  //   .then(response => {
+  //       console.log(response.data); // Handle the response if needed
+  //   })
+  //   .catch(error => {
+  //       console.error('Error initiating OAuth flow:', error);
+  //   });
+  //   },
+
   openGmailLogin() {
-    window.location.href = 'https://127.0.0.1:5000/login/login_oauth';
+    window.location.href = 'https://localhost:5000/authentication/login_oauth';
   },
+  // async openGmailLogin(){
+  //   account.createOAuth2Session(
+  //     'google',
+  //     'http://localhost:5173/scrape',
+  //     'http://localhost:5173'
+  //   )
+  // },
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     }
