@@ -3,6 +3,8 @@ import LandingPage from '../views/LandingPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import AboutUsPage from '../views/AboutUsPage.vue'
 import ScrapePage from '../views/ScrapePage.vue'
+import PricingPage from '../views/PricingPage.vue'
+import SignUpPage from '../views/SignUpPage.vue'
 
 const routes = [
     {
@@ -24,6 +26,36 @@ const routes = [
         path: '/scrape',
         name: 'Scrape',
         component: ScrapePage
+    },
+    // {
+    //     path: '/scrape/inbox',
+    //     name: 'Inbox',
+    //     component: InboxEmailTable
+    //   },
+    //   {
+    //     path: '/scrape/sent',
+    //     name: 'Sent',
+    //     component: SentEmailTable
+    //   },
+    //   {
+    //     path: '/scrape/draft',
+    //     name: 'Drafts',
+    //     component: DraftEmailTable
+    //   },
+    //   {
+    //     path: '/scrape/archive',
+    //     name: 'Archive',
+    //     component: ArchiveEmailTable
+    //   },
+    {
+        path: '/pricing',
+        name: 'Pricing',
+        component: PricingPage
+    },
+    {
+        path: '/signup',
+        name: 'SignUp',
+        component: SignUpPage
     },
 ]
 
