@@ -4,6 +4,7 @@ from models.user import User
 from werkzeug.security import check_password_hash
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from dotenv import load_dotenv
 import os
@@ -21,7 +22,8 @@ AUTH_URL = os.getenv('AUTH_URL')
 
 SCOPES = ["https://mail.google.com/"]
 
-login_bp = Blueprint('login', __name__, url_prefix='/login')
+login_bp = Blueprint('login', __name__)
+# login_bp = Blueprint('login', __name__, url_prefix='/login')
 CORS(login_bp, resources={r"*": {"origins": "https://localhost:5173", "supports_credentials": True}})
 
 
@@ -74,6 +76,9 @@ def callback():
     credentials = flow.credentials
     # print("credentiale asddasd", json.dumps(credentials.to_json(), indent=2))
     # print(credentials.to_json())
+    service = build('gmail', 'v1', credentials=credentials)
+    profile = service.users().getProfile(userId='me').execute()
+    session['email'] = profile['emailAddress']
     session['credentials'] = credentials_to_dict(credentials)
     # print(session)
     # return redirect(url_for('emails.get_inbox'))
@@ -93,3 +98,10 @@ def credentials_to_dict(credentials):
 def get_credentials():
     credentials = json.loads(session.get('credentials'))
     return credentials
+
+@login_bp.route('/get_email', methods=['GET'])
+def get_email():
+    email_addr = session.get('email')
+    if not email_addr:
+        return jsonify({'error': 'Email not found'}), 404
+    return jsonify({'email': email_addr}), 200

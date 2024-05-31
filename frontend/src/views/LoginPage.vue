@@ -21,7 +21,7 @@
         <a href="#" class="text-sm text-orange-500 hover:text-orange-700 hover:underline">Forgot Password?</a>
         <button type="submit" class="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">Log in</button>
         <button @click="openGmailLogin" class="flex items-center justify-center bg-white border border-gray-300 rounded-md w-full py-2 text-gray-800 hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
-          <img src="/src/assets/styles/images//gmail_logo.png" alt="Gmail Logo" class="w-6 h-6 mr-2">
+          <img src="/src/assets/styles/images/gmail_logo.png" alt="Gmail Logo" class="w-6 h-6 mr-2">
           Login with Gmail
         </button>
       </form>
@@ -33,8 +33,6 @@
 <script>
 import Toast from 'primevue/toast';
 import 'primeicons/primeicons.css';
-import axios from 'axios';
-import {account} from '../appwrite'
 
 export default {
   components: {
@@ -50,69 +48,35 @@ export default {
     };
   },
   methods: {
-    async login() {
-    this.usernameError = '';
-    this.passwordError = '';
-    
-    if (!this.username) {
-      this.usernameError = 'Username is required.';
-      this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000});
-      return;
-    }
-    
-    if (!this.password) {
-      this.passwordError = 'Password is required.';
-      this.$refs.toast.add({severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000});
-      return;
-    }
+    login() {
+      this.usernameError = '';
+      this.passwordError = '';
 
-    try {
-      const response = await fetch('/login/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: this.username, password: this.password })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        this.$refs.toast.add({severity: 'info', summary: 'Login Successful', detail: data.message, life: 3000});
-        this.$router.push('/scrape');
-      } else {
-        const errorData = await response.json();
-        this.$refs.toast.add({severity: 'error', summary: 'Login Failed', detail: errorData.error, life: 3000});
+      if (!this.username) {
+        this.usernameError = 'Username is required.';
+        this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000 });
+        return;
       }
-    } catch (error) {
-      this.$refs.toast.add({severity: 'error', summary: 'Login Error', detail: error.message, life: 3000});
-    }
-  },
-  // openGmailLogin() {
-  //   axios.get('https://localhost:5000/authentication/login_oauth', { withCredentials: true })
-  //   .then(response => {
-  //       console.log(response.data); // Handle the response if needed
-  //   })
-  //   .catch(error => {
-  //       console.error('Error initiating OAuth flow:', error);
-  //   });
-  //   },
 
-  openGmailLogin() {
-    window.location.href = 'https://localhost:5000/authentication/login_oauth';
-  },
-  // async openGmailLogin(){
-  //   account.createOAuth2Session(
-  //     'google',
-  //     'http://localhost:5173/scrape',
-  //     'http://localhost:5173'
-  //   )
-  // },
+      if (!this.password) {
+        this.passwordError = 'Password is required.';
+        this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000 });
+        return;
+      }
+
+      // Directly route to the scrape page with the username
+      this.$router.push({ path: '/scrape', query: { email: this.username } });
+    },
+    openGmailLogin() {
+      window.location.href = 'https://127.0.0.1:5000/authentication/login_oauth';
+    },
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     }
   }
 };
 </script>
+
 <style scoped>
 input:focus {
   outline: none;
