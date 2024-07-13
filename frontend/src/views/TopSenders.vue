@@ -74,7 +74,3 @@ const fetchTopSendersData = async () => {
 
 onMounted(fetchTopSendersData);
 </script>
-
-<style scoped>
-/* Your existing styles here */
-</style>
