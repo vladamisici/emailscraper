@@ -11,30 +11,31 @@
                 @click="setCategory(cat)" 
                 :class="categoryButtonClass(cat)" 
                 :label="cat.charAt(0).toUpperCase() + cat.slice(1)"
+                :icon="getIconClass(cat)"
                 class="nav-button"
             />
+            <Button 
+                @click="showAnalysisModal = true"
+                class="nav-button"
+                label="Email Analysis"
+                icon="pi pi-chart-bar"
+            />
+            <Button 
+                @click="showTopSendersModal = true"
+                class="nav-button"
+                label="Top Senders Analysis"
+                icon="pi pi-users"
+            />
+            <Button class="nav-button" @click="$emit('send-email')" label = "Send Email" icon="pi pi-plus"/>
         </nav>
-        <div class="labels-section">
-            <div class="labels-header flex justify-between items-center">
-                <label class="block text-gray-700 font-bold">Labels</label>
-                <Button 
-                    icon="pi pi-plus" 
-                    class="p-button-rounded p-button-text p-button-icon-only"
-                    @click="showCreateLabelDialog = true" 
-                />
-            </div>
-            <div class="labels-list mt-2">
-                <span 
-                    v-for="label in labels" 
-                    :key="label.name" 
-                    @click="setLabel(label)"
-                    class="label-item inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                    :style="{ backgroundColor: label.color }"
-                >
-                    {{ label.name }}
-                </span>
-            </div>
-        </div>
+        
+    
+    <Dialog v-model:visible="showAnalysisModal" header="Email Analysis" :modal="true" :style="{width: '80vw'}">
+      <EmailAnalysis />
+    </Dialog>
+    <Dialog v-model:visible="showTopSendersModal" header="Top Email Senders" :modal="true" :style="{width: '80vw'}">
+      <TopSendersAnalysis />
+    </Dialog>
         <div class="logout-section mt-auto">
             <Button 
                 label="Log Out" 
@@ -42,15 +43,7 @@
                 @click="logout"
             />
         </div>
-        <Dialog
-            v-model:visible="showCreateLabelDialog"
-            header="Create New Label"
-            :modal="true"
-            :closable="false"
-            class="w-full max-w-sm"
-        >
-            <CreateLabelDialog @close="showCreateLabelDialog = false" @create-label="addLabel" />
-        </Dialog>
+
     </aside>
 </template>
 
@@ -60,25 +53,51 @@ import { defineProps, defineEmits } from 'vue';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import CreateLabelDialog from './CreateLabelDialog.vue';
+import EmailForm from '../components/EmailForm.vue'
 import axios from 'axios';
+import EmailAnalysis from '../views/EmailAnalysis.vue';
+import TopSendersAnalysis from '../views/TopSenders.vue';
+
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   loggedInEmail: String,
   category: String,
-  labels: Array  // Ensure labels prop is defined
+  labels: Array 
 });
 
-const emit = defineEmits(['setCategory', 'setLabel']);
+const getIconClass = (category) => {
+  switch (category) {
+    case 'inbox':
+      return 'pi pi-inbox';
+    case 'sent':
+      return 'pi pi-send';
+    case 'spam':
+      return 'pi pi-exclamation-triangle';
+    case 'drafts':
+      return 'pi pi-pencil';
+    default:
+      return 'pi pi-inbox';
+  }
+};
 
-const categories = ['inbox', 'sent', 'drafts', 'archive'];
+
+const showAnalysisModal = ref(false);
+const showTopSendersModal = ref(false);
+
+const emit = defineEmits(['setCategory', 'setLabel', 'toggleSendEmail', 'send-email']);
+
+const categories = ['inbox', 'sent', 'drafts', 'spam'];
 
 const setCategory = (cat) => {
   emit('setCategory', cat);
 };
 
-const setLabel = (label) => {
-  emit('setLabel', label);
-};
+// const setLabel = (label) => {
+//   emit('setLabel', label);
+// };
 
 const categoryButtonClass = (btnCategory) => {
   return {
@@ -89,9 +108,15 @@ const categoryButtonClass = (btnCategory) => {
 
 const showCreateLabelDialog = ref(false);
 
+
+
 const logout = () => {
   console.log('Logged out');
-  window.location.href = 'https://127.0.0.1:5000/mail/logout';
+  window.location.href = 'https://localhost:5000/mail/logout';
+};
+
+const navigateToAnalysis = () => {
+  router.push('/email-analysis');
 };
 </script>
   
@@ -197,7 +222,7 @@ const logout = () => {
     color: #fff !important;
   }
   
-  /* Media Queries for Responsive Design */
+
   @media (max-width: 1024px) {
     .sidebar {
       width: 200px;

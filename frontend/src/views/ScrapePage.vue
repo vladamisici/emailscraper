@@ -6,19 +6,26 @@
       :category="category" 
       :labels="labels"  
       @setLabel="setLabel"
+      @send-email="openEmailForm"
     />
     <main class="main-content flex-1 overflow-auto p-4">
       <Header :filterText="filterText" @update:filterText="filterText = $event" @clearFilter="clearFilter" @refreshEmails="refreshEmails" />
-      <section class="email-section">
+      <section class="email-section" v-if="!showSendEmail.value">
         <div class="section-header">
           <h2 class="section-title">{{ categoryHeader }}</h2>
           <button v-if="isLabelCategory" @click="editLabel">Edit label</button>
         </div>
         <EmailTable :emails="filteredEmails" :category="category" :isLoading="isLoading" @openEmail="openEmail" />
       </section>
+
+      <!-- <Button label="Send Email" @click="showEmailModal = true" /> -->
+      <!-- <Dialog v-model:visible="showSendEmailModal" modal header="Send Email">
+        <SendEmail @close="showSendEmailModal = false" />
+      </Dialog> -->
     </main>
     <EmailDialog :email="selectedEmail" :visible="emailDialogVisible" @update:visible="emailDialogVisible = $event" />
     <EditLabelDialog :visible="editLabelDialogVisible" :label="selectedLabel" @update:visible="editLabelDialogVisible = $event" @saveLabelCriteria="saveLabelCriteria" />
+    <email-form v-if="showEmailForm" @close-form="closeEmailForm" :credentials="credentials" />
   </div>
 </template>
 
@@ -30,18 +37,23 @@ import Header from '../components/Header.vue';
 import EmailTable from '../components/EmailTable.vue';
 import EmailDialog from '../components/EmailDialog.vue';
 import EditLabelDialog from '../components/EditLabelDialog.vue';
+import Dialog from 'primevue/dialog';
+import EmailForm from '../components/EmailForm.vue';
 import axios from 'axios';
 
+
+const showSendEmail = ref(false);
 const route = useRoute();
 const email_addr = ('');
-const loggedInEmail = ref(email_addr || 'user@example.com');
+const loggedInEmail = ref('');
 const isLoading = ref(true);
+let currentRequestCancelToken = null;
 
 const fetchEmailAddr = async () => {
   try{
-    const response = axios.get('https://localhost:5000/authentication/get_email', {withCredentials: true});
+    const response = await axios.get('https://localhost:5000/authentication/get_email', {withCredentials: true});
     if(response.status === 200 && response.data.email){
-      email_addr = response.data.email;
+      loggedInEmail.value = response.data.email;
     }
     else{
       console.error('Failed to fetch email', response.data);
@@ -52,6 +64,17 @@ const fetchEmailAddr = async () => {
   }
 };
 
+const showEmailForm = ref(false);
+const credentials = ref(null);
+
+const openEmailForm = () => {
+  showEmailForm.value = true;
+};
+
+const closeEmailForm = () => {
+  showEmailForm.value = false;
+};
+
 const pageSize = ref(10);
 const filterText = ref('');
 const emailDialogVisible = ref(false);
@@ -59,49 +82,45 @@ const editLabelDialogVisible = ref(false);
 const selectedEmail = ref({});
 const category = ref('inbox');
 const labels = ref([
-  { name: 'Work', criteria: email => email.from.endsWith('@organization.com') },
+  { name: 'Work', criteria: email => email.from.endsWith('@medium.com') },
   { name: 'Personal', criteria: email => email.from.endsWith('@gmail.com') },
-  // Add more labels as needed
 ]);
 const selectedLabel = ref(null);
 
 const emails = ref([]); 
+// const emailCache ={};
+const emailCache = ref({});
 
-// const setCategory = (newCategory) => {
-//   category.value = newCategory;
-//   selectedLabel.value = null;
-// };
 
 const setCategory = async (newCategory) => {
   category.value = newCategory;
   selectedLabel.value = null;
   isLoading.value = true;
+  
+  if (currentRequestCancelToken) {
+    currentRequestCancelToken.cancel('Request cancelled due to category change');
+  }
+  
+  currentRequestCancelToken = axios.CancelToken.source();
+  
   try {
-    switch (newCategory) {
-      case 'inbox':
-        await fetchInboxEmails();
-        break;
-      case 'sent':
-        await fetchSentEmails();
-        break;
-      case 'drafts':
-        await fetchDrafts();
-        break;
-      case 'archive':
-        await fetchArchivedEmails();
-        break;
-      default:
-        break;
-    }
+    await fetchEmails(currentRequestCancelToken.token);
   } finally {
     isLoading.value = false;
   }
 };
 
 
+const isRefreshing = ref(false);
 
-const fetchEmails = async () => {
-  const cancelTokenSource = axios.CancelToken.source();
+const fetchEmails = async (cancelToken) => {
+  isLoading.value = true;
+
+  if (emailCache.value[category.value] && !isRefreshing.value) {
+    emails.value = emailCache.value[category.value];
+    isLoading.value = false;
+    return;
+  }
 
   try {
     let response;
@@ -109,25 +128,25 @@ const fetchEmails = async () => {
       case 'inbox':
         response = await axios.get('https://localhost:5000/mail/inbox', {
           withCredentials: true,
-          cancelToken: cancelTokenSource.token,
+          cancelToken: cancelToken,
         });
         break;
       case 'sent':
         response = await axios.get('https://localhost:5000/mail/sent', {
           withCredentials: true,
-          cancelToken: cancelTokenSource.token,
+          cancelToken: cancelToken,
         });
         break;
       case 'drafts':
         response = await axios.get('https://localhost:5000/mail/drafts', {
           withCredentials: true,
-          cancelToken: cancelTokenSource.token,
+          cancelToken: cancelToken,
         });
         break;
-      case 'archive':
-        response = await axios.get('https://localhost:5000/mail/archive', {
+      case 'spam':
+        response = await axios.get('https://localhost:5000/mail/spam', {
           withCredentials: true,
-          cancelToken: cancelTokenSource.token,
+          cancelToken: cancelToken,
         });
         break;
       default:
@@ -135,7 +154,12 @@ const fetchEmails = async () => {
     }
 
     if (response && response.status === 200) {
-      emails.value = response.data;
+      if (response.data.message) {
+        emails.value = [];
+      } else {
+        emails.value = response.data;
+        emailCache.value[category.value] = response.data;
+      }
     } else {
       console.error('Failed to fetch emails:', response);
     }
@@ -146,10 +170,15 @@ const fetchEmails = async () => {
       console.error('Error fetching emails:', error);
     }
   } finally {
-    cancelTokenSource.cancel('Request cancelled by user');
     isLoading.value = false;
+    isRefreshing.value = false;
   }
 };
+
+
+// const toggleSendEmail = () => {
+//   showSendEmail.value = !showSendEmail.value;
+// };
 
 const setLabel = (label) => {
   selectedLabel.value = label;
@@ -164,7 +193,7 @@ const categoryHeader = computed(() => {
     case 'inbox': return 'Inbox Emails';
     case 'sent': return 'Sent Emails';
     case 'drafts': return 'Drafts';
-    case 'archive': return 'Archived Emails';
+    case 'spam': return 'Spam Emails';
     default: return '';
   }
 });
@@ -172,12 +201,15 @@ const categoryHeader = computed(() => {
 const isLabelCategory = computed(() => selectedLabel.value !== null);
 
 const filteredEmails = computed(() => {
-  let filtered = emails.value;
+  let filtered = emails.value || [];
   if (filterText.value) {
-    filtered = filtered.filter(email => email.subject.includes(filterText.value) || email.content.includes(filterText.value));
+    filtered = filtered.filter(email => 
+      (email.subject?.toLowerCase().includes(filterText.value.toLowerCase()) || 
+       email.content?.toLowerCase().includes(filterText.value.toLowerCase())) ?? false
+    );
   }
   if (selectedLabel.value) {
-    filtered = filtered.filter(selectedLabel.value.criteria);
+    filtered = filtered.filter(email => selectedLabel.value.criteria(email));
   }
   return filtered;
 });
@@ -187,37 +219,6 @@ const clearFilter = () => {
 };
 
 
-// const fetchInboxEmails = async () => {
-//   try {
-//     const response = await axios.get('https://localhost:5000/mail/inbox', {withCredentials: true});
-//     // const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
-//     if (response.status === 200) {
-//       emails.value = response.data;
-//     } else {
-//       console.error('Failed to fetch emails:', response.data);
-//     }
-//   } catch (error) {
-//     console.error('Error fetching emails:', error);
-//   } finally {
-//     isLoading.value = false;
-//   }
-// };
-
-// const fetchSentEmails = async () => {
-//   try {
-//     const response = await axios.get('https://localhost:5000/mail/sent', {withCredentials: true});
-//     // const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
-//     if (response.status === 200) {
-//       emails.value = response.data;
-//     } else {
-//       console.error('Failed to fetch emails:', response.data);
-//     }
-//   } catch (error) {
-//     console.error('Error fetching emails:', error);
-//   } finally {
-//     isLoading.value = false;
-//   }
-// };
 
 const openEmail = (email) => {
   selectedEmail.value = email;
@@ -233,19 +234,24 @@ const saveLabelCriteria = (label, newCriteria) => {
   editLabelDialogVisible.value = false;
 };
 
-// onMounted(fetchEmails);
-onMounted(() => {
+onMounted(async () => {
   fetchEmailAddr();
   fetchEmails();
 });
 
+const clearCacheForCategory = () => {
+  delete emailCache[category.value];
+};
+
 const refreshEmails = async () => {
   isLoading.value = true;
-  try{
+  isRefreshing.value = true;
+  try {
+    delete emailCache.value[category.value];
     await fetchEmails();
-  }
-  finally{
+  } finally {
     isLoading.value = false;
+    isRefreshing.value = false;
   }
 };
 </script>

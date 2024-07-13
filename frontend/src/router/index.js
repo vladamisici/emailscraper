@@ -5,6 +5,10 @@ import AboutUsPage from '../views/AboutUsPage.vue'
 import ScrapePage from '../views/ScrapePage.vue'
 import PricingPage from '../views/PricingPage.vue'
 import SignUpPage from '../views/SignUpPage.vue'
+import SendEmail from '../components/SendEmail.vue'
+import TopSendersAnalysis from '../views/TopSenders.vue'
+import EmailAnalysis from '../views/EmailAnalysis.vue'
+
 
 const routes = [
     {
@@ -26,6 +30,11 @@ const routes = [
         path: '/scrape',
         name: 'Scrape',
         component: ScrapePage
+    },
+    {
+        path: '/send-email',
+        name: 'SendEmail',
+        component: SendEmail
     },
     // {
     //     path: '/scrape/inbox',
@@ -57,6 +66,16 @@ const routes = [
         name: 'SignUp',
         component: SignUpPage
     },
+    {
+        path: '/email-analysis',
+        name: 'EmailAnalysis',
+        component: EmailAnalysis
+    },
+    {
+        path: '/top-senders',
+        name: 'TopSenders',
+        component: TopSendersAnalysis
+    }
 ]
 
 const router = createRouter({

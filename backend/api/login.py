@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, json
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, json, Flask
 import jwt
 from models.user import User
 from werkzeug.security import check_password_hash
@@ -11,6 +11,7 @@ import os
 from flask_cors import CORS, cross_origin
 from .scrape import emails_bp, get_inbox
 import flask
+import base64
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ SCOPES = ["https://mail.google.com/"]
 
 login_bp = Blueprint('login', __name__)
 # login_bp = Blueprint('login', __name__, url_prefix='/login')
-CORS(login_bp, resources={r"*": {"origins": "https://localhost:5173", "supports_credentials": True}})
+CORS(login_bp, resources={r"*": {"origins": "https://localhost:5173"}}, supports_credentials=True)
 
 
 
@@ -56,6 +57,7 @@ def login_oauth():
         prompt='select_account'
     )
     session['state'] = state
+    flask.session.modified = True
     # print(session)
     return flask.redirect(authorization_url)
 

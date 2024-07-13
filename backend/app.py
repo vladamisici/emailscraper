@@ -11,24 +11,31 @@ load_dotenv()
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, resources={r"*": {"origins": "https://localhost:5173"}})
+CORS(app, resources={r"/*": {"origins": "https://localhost:5173"}}, supports_credentials=True)
 
 # CORS(app)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_TYPE'] = 'filesystem'
+# app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'flask_sessions')
+# app.config['SESSION_FILE_THRESHOLD'] = 100
+
+# app.session_interface = SecureCookieSessionInterface()
 
 app.config.update(
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
+    # SESSION_COOKIE_SAMESITE='Lax',
+    # SECRET_KEY=os.getenv('SECRET_KEY')
 )
 
 # @app.after_request
 # def after_request(response):
-#     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
+#     response.headers['Access-Control-Allow-Origin'] = 'https://localhost:5173'
 #     response.headers['Access-Control-Allow-Credentials'] = 'true'
 #     print(f"Session after request: {session}")
 #     return response

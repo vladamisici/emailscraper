@@ -17,7 +17,7 @@
           <router-link to="/pricing" class="text-white hover:bg-orange-700 px-3 py-2 rounded-md">Pricing</router-link>
           <router-link to="/about" class="text-white hover:bg-orange-700 px-3 py-2 rounded-md">About Us</router-link>
           <router-link to="/login" class="text-white hover:bg-orange-700 px-3 py-2 rounded-md">Log in</router-link>
-          <router-link to="/signup" class="bg-white text-orange-700 hover:bg-gray-100 px-4 py-2 rounded-md">Sign Up</router-link>
+          <!-- <router-link to="/signup" class="bg-white text-orange-700 hover:bg-gray-100 px-4 py-2 rounded-md">Sign Up</router-link> -->
         </div>
       </template>
     </Toolbar>

@@ -21,6 +21,7 @@
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
   import LoadingSpinner from '../components/LoadingSpinner.vue';
+  import axios from 'axios';
 
   
   const props = defineProps({
@@ -47,9 +48,23 @@
     return `<span>${rowData.date}</span>`;
   };
   
-  const openEmail = (email) => {
-    emits('openEmail', email);
-  };
+  // const openEmail = (email) => {
+  //   emits('openEmail', email);
+  // };
+  const openEmail = (event) => {
+  const email = event.data;
+  emits('openEmail', email);
+};
+//   const openEmail = (email) => {
+//   const emailData = {
+//     from: email.from,
+//     to: email.to,
+//     date: email.date,
+//     subject: email.subject,
+//     content: email.content,
+//   };
+//   emits('openEmail', emailData);
+// };
   </script>
   
   <style scoped>

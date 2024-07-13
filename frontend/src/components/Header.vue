@@ -2,6 +2,7 @@
     <header class="header">
       <div class="search-bar">
         <InputText :value="filterText" @input="$emit('update:filterText', $event.target.value)" placeholder="Search..." />
+        <!-- <InputText v-model="filterText" placeholder="Search..." /> -->
         <Button @click="$emit('clearFilter')" label="Clear" icon="pi pi-times" class="clear-button" />
       </div>
       <Button @click="$emit('refreshEmails')" label="Refresh" icon="pi pi-refresh" class="refresh-button" />
@@ -18,6 +19,15 @@
   });
   
   const emits = defineEmits(['update:filterText', 'clearFilter', 'refreshEmails']);
+
+//   const filterText = computed({
+//   get() {
+//     return props.filterText;
+//   },
+//   set(value) {
+//     emits('update:filterText', value);
+//   }
+// });
   </script>
   
   <style scoped>

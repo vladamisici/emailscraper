@@ -3,7 +3,7 @@
     <div class="w-full max-w-md p-10 bg-white rounded-lg shadow-xl transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-105">
       <h2 class="mb-6 text-3xl font-bold text-center text-gray-800">Login</h2>
       <form @submit.prevent="login" class="space-y-6">
-        <div>
+        <!-- <div>
           <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
           <input id="username" v-model="username" class="mt-1 w-full rounded-md border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50 placeholder-gray-400" placeholder="Enter your username">
           <p v-if="usernameError" class="mt-2 text-sm text-orange-600">{{ usernameError }}</p>
@@ -19,7 +19,7 @@
           <p v-if="passwordError" class="mt-2 text-sm text-orange-600">{{ passwordError }}</p>
         </div>
         <a href="#" class="text-sm text-orange-500 hover:text-orange-700 hover:underline">Forgot Password?</a>
-        <button type="submit" class="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">Log in</button>
+        <button type="submit" class="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50">Log in</button> -->
         <button @click="openGmailLogin" class="flex items-center justify-center bg-white border border-gray-300 rounded-md w-full py-2 text-gray-800 hover:bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
           <img src="/src/assets/styles/images/gmail_logo.png" alt="Gmail Logo" class="w-6 h-6 mr-2">
           Login with Gmail
@@ -33,8 +33,10 @@
 <script>
 import Toast from 'primevue/toast';
 import 'primeicons/primeicons.css';
+import axios from 'axios';
 
 export default {
+  
   components: {
     Toast
   },
@@ -48,28 +50,37 @@ export default {
     };
   },
   methods: {
-    login() {
-      this.usernameError = '';
-      this.passwordError = '';
+    // login() {
+    //   this.usernameError = '';
+    //   this.passwordError = '';
 
-      if (!this.username) {
-        this.usernameError = 'Username is required.';
-        this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000 });
-        return;
-      }
+    //   if (!this.username) {
+    //     this.usernameError = 'Username is required.';
+    //     this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Username is required.', life: 3000 });
+    //     return;
+    //   }
 
-      if (!this.password) {
-        this.passwordError = 'Password is required.';
-        this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000 });
-        return;
-      }
+    //   if (!this.password) {
+    //     this.passwordError = 'Password is required.';
+    //     this.$refs.toast.add({ severity: 'warn', summary: 'Validation Error', detail: 'Password is required.', life: 3000 });
+    //     return;
+    //   }
 
       // Directly route to the scrape page with the username
-      this.$router.push({ path: '/scrape', query: { email: this.username } });
-    },
+    //   this.$router.push({ path: '/scrape', query: { email: this.username } });
+    // },
     openGmailLogin() {
       window.location.href = 'https://127.0.0.1:5000/authentication/login_oauth';
     },
+    
+  // async openGmailLogin() {
+  // try {
+  //   const response = await axios.get('https://127.0.0.1:5000/authentication/login_oauth');
+  //   window.location.href = response.data.redirectUrl;
+  // } catch (error) {
+  //   console.error('Error during OAuth callback:', error);
+  // }
+  // },
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     }
